@@ -1,5 +1,5 @@
 /** 
-☑️ 资源解析器 ©𝐒𝐡𝐚𝐰𝐧  ⟦2024-03-14 12:00⟧
+☑️ 资源解析器 ©𝐒𝐡𝐚𝐰𝐧  ⟦2024-09-11 17:35⟧
 ----------------------------------------------------------
 🛠 发现 𝐁𝐔𝐆 请反馈: https://t.me/Shawn_Parser_Bot
 ⛳️ 关注 🆃🅶 相关频道: https://t.me/QuanX_API
@@ -1009,15 +1009,15 @@ function ALPN_Handle(cnt,palpn) {
 
 function Mock2QXReject(row, filename) {
     if (/dict/i.test(filename)) {
-        return row.replace(/ /g, "").split("data=")[0] + " url " + "reject-dict"
+        return row.replace(/ /g, "").split("data=")[0].split("data-type=")[0] + " url " + "reject-dict"
     } else if (/array/i.test(filename)) {
-        return row.replace(/ /g, "").split("data=")[0] + " url " + "reject-array"
-    } else if (/(txt|html)/i.test(filename)) {
-        return row.replace(/ /g, "").split("data=")[0] + " url " + "reject-200"
+        return row.replace(/ /g, "").split("data=")[0].split("data-type=")[0] + " url " + "reject-array"
+    } else if (/(txt|html)/i.test(filename) || filename==null) {
+        return row.replace(/ /g, "").split("data=")[0].split("data-type=")[0] + " url " + "reject-200"
     } else if (/(png|jpg|gif)/i.test(filename)) {
-        return row.replace(/ /g, "").split("data=")[0] + " url " + "reject-img"
+        return row.replace(/ /g, "").split("data=")[0].split("data-type=")[0] + " url " + "reject-img"
     } else {
-        return row.replace(/ /g, "").split("data=")[0] + " url " + "reject"
+        return row.replace(/ /g, "").split("data=")[0].split("data-type=")[0] + " url " + "reject"
     }
 }
 
@@ -1041,10 +1041,10 @@ function URX2QX(subs) {
         } else if (subs[i].indexOf("data=") != -1 && subs.indexOf("[Map Local]") != -1){ // Map Local 类型
             // 取subs[i]的文件名
             let fn = subs[i].match(/data=.+\/(.+)"/) ? subs[i].match(/data=.+\/(.+)"/)[1] : null
-            if (!/header=".*content-type/i.test(subs[i]) && /blank/i.test(fn)) {
+            if ((!/header=".*content-type/i.test(subs[i]) && /blank/i.test(fn)) || fn==null) {
                 rw = Mock2QXReject(subs[i], fn)
             } else {
-                rw = subs[i].replace(/ /g, "").split("data=")[0].replace(/\"/g,"") + " url echo-response text/html echo-response " + subs[i].split("data=")[1].split(" ")[0].replace(/\"/g,"").replace(/ /g, "")//"reject-dict"
+                rw = subs[i].replace(/ /g, "").split("data=")[0].split("data-type=")[0].replace(/\"/g,"") + " url echo-response text/html echo-response " + subs[i].split("data=")[1].split(" ")[0].replace(/\"/g,"").replace(/ /g, "")//"reject-dict"
                 if (subs[i].indexOf("header=")!=-1) {
                     if (subs[i].indexOf("Content-Type:") !=-1) {
                         let tpe = subs[i].split("header=")[1].split("Content-Type:")[1].split(",")[0].replace(/\"/g,"")
@@ -2092,7 +2092,8 @@ function VL2QX(subs, Pudp, Ptfo, Pcert0, PTls13) {
     } else if(cnt.indexOf("obfs=websocket")!=-1) {
       obfs = cnt.indexOf("tls=1") != -1? "obfs=wss" : "obfs=ws"
     } 
-  thost=cnt.indexOf("obfsParam=") == -1? thost : "obfs-host=" + decodeURIComponent(cnt.split("obfsParam=")[1].split("&")[0].split("#")[0])
+  thost=cnt.indexOf("obfsParam=") == -1? thost : "obfs-host=" + decodeURIComponent(cnt.split("obfsParam=")[1].split("&")[0].split("#")[0]).replace(/\"|(Host\":)|\{|\}/g,"")
+
   puri = cnt.indexOf("path=") == -1? puri : "obfs-uri=" + decodeURIComponent(cnt.split("path=")[1].split("&")[0].split("#")[0])
   } else if (cnt.indexOf("&type=ws")!=-1 || cnt.indexOf("?type=ws")!=-1 || cnt.indexOf("type=http")!=-1 || cnt.indexOf("security=tls")!=-1) {//v2rayN uri
     if(cnt.indexOf("type=http") != -1) {
